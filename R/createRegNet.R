@@ -13,36 +13,19 @@ function(tfnet,glist,saveFile=FALSE){
   glist <- as.character(read.table(glist)$V1)
   G1 <- as.character(tfnet$V1)
   G2 <- as.character(tfnet$V2)
-
+  
   edge <- matrix(nrow = length(G1),ncol = 2)
-
-  library(hashmap)
-
-  hmap <- hashmap(glist,1:length(glist))
-
-  for (i in 1:length(G1)) {
-    if(G1[i]==G2[i]){
-      edge[i,1]=NA
-      edge[i,2]=NA
-    }else{
-      ind1 <- hmap$find(G1[i])
-      ind2 <- hmap$find(G2[i])
-      if(!is.na(ind1)&&!is.na(ind2)){
-        edge[i,1]=ind1
-        edge[i,2]=ind2
-      }
-    }
-    if((i%%(length(G1)/10))==0){
-      print(paste(i/(length(G1)/100),"%"))
-    }
-  }
-
-  edge <- edge[complete.cases(edge),]
-
+  
+  edge[,1] <- match(G1,glist)
+  edge[,2] <- match(G2,glist)
+  keep <- !is.na(edge[,1]) & !is.na(edge[,2])
+  edge <- edge[keep,]
+  keep <- edge[,1]!=edge[,2]
+  edge <- edge[keep,]
+  
   if(saveFile){
     write.table(edge,file = "../example_data/edge.txt",quote = FALSE,row.names = FALSE,col.names = FALSE)
   }
-
+  
   return(edge)
-
 }
